@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HyperCRM</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Zen+Dots&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+    }
+    .font-logo {
+      font-family: 'Zen Dots', sans-serif;
+    }
+    /* Regras de Impressão Centralizadas */
+    @media print {
+      body {
+        background-color: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .print-hidden {
+        display: none !important;
+      }
+      .print-area {
+        display: block !important;
+        position: absolute;
+        left: 0;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        width: 100%;
+        height: auto;
+      }
+      .break-before-page {
+        page-break-before: always;
+      }
+    }
+    
+    @page {
+      size: A4;
+      margin: 2cm;
+
+      @top-left {
+        content: "Hyperview Marketing e Eventos";
+        font-family: 'Inter', sans-serif;
+        font-size: 8pt;
+        color: #666;
+        border-bottom: 1px solid #ccc;
+        width: calc(100% - 4cm); /* Adjust width to fit margin */
+        padding-bottom: 5px;
+      }
+
+      @bottom-right {
+        content: "Página " counter(page);
+        font-family: 'Inter', sans-serif;
+        font-size: 8pt;
+        color: #666;
+      }
+    }
+  </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://aistudiocdn.com/react@^19.2.0",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+    "react/": "https://aistudiocdn.com/react@^19.2.0/",
+    "@google/genai": "https://aistudiocdn.com/@google/genai@^1.26.0",
+    "@supabase/supabase-js": "https://aistudiocdn.com/@supabase/supabase-js@^2.76.1",
+    "react-icons/": "https://aistudiocdn.com/react-icons@^5.5.0/"
+  }
+}
+</script>
+</head>
+<body class="bg-gray-900">
+  <div id="root"></div>
+  <script type="module" src="index.tsx"></script>
+</body>
+</html>

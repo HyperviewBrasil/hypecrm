@@ -1,20 +1,48 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Análise e Resumo do HypeCRM
+## Visão Geral
+O HypeCRM é um sistema de gestão de relacionamento com clientes (CRM) desenvolvido em TypeScript com React. O aplicativo é projetado para gerenciar todo o ciclo de vendas, desde a prospecção de clientes até a gestão financeira de contratos.
 
-# Run and deploy your AI Studio app
+## Estrutura do Aplicativo
+### Tecnologias Principais
+- Frontend : React (v19.2.0) com TypeScript
+- Backend : Supabase (autenticação e banco de dados)
+- Build : Vite
+- IA : Integração com Google AI (@google/genai)
+### Componentes Principais
+O aplicativo está organizado em módulos funcionais:
 
-This contains everything you need to run your app locally.
+1. Autenticação : Sistema de login e controle de sessão
+2. Dashboard : Visão geral com acesso rápido às principais funcionalidades
+3. Clientes : Cadastro e gestão de empresas/unidades
+4. Propostas : Criação e acompanhamento de propostas comerciais
+5. Contratos : Geração e gestão de contratos a partir de propostas aprovadas
+6. Finanças : Controle financeiro e faturamento
+7. Configurações : Personalização do sistema
+### Fluxo de Trabalho
+O aplicativo suporta o seguinte fluxo de trabalho:
 
-View your app in AI Studio: https://ai.studio/apps/drive/1auLkXfo3QCcUBIUVnQqpotZSG8sQAGo7
+1. Cadastro de clientes (com dados completos de CNPJ)
+2. Criação de propostas para clientes
+3. Conversão de propostas aprovadas em contratos
+4. Gestão financeira dos contratos
+### Recursos Especiais
+- Área Pública : Páginas acessíveis sem login (landing page, rastreamento de propostas/contratos)
+- Hype : Funcionalidade especial (possivelmente um assistente IA)
+- Rastreadores : Sistemas para acompanhamento de propostas, contratos e faturas
+- Notificações : Sistema de toast para feedback ao usuário
+### Modelo de Dados
+O sistema trabalha com entidades bem definidas:
 
-## Run Locally
+- EmpresaUnidade : Dados completos de clientes (CNPJ, contatos, endereço)
+- Proposal : Propostas comerciais com itens, valores e status
+- Contract : Contratos gerados a partir de propostas aprovadas
+- Financeiro : Gestão de faturas e pagamentos
+## Arquitetura
+O aplicativo segue uma arquitetura de componentes React moderna:
 
-**Prerequisites:**  Node.js
-
-
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+- Contexts : Gerenciamento de estado global (ToastContext, SettingsContext)
+- Services : Camada de serviços para comunicação com APIs
+- Components : Organizados por funcionalidade (Features) e elementos de UI reutilizáveis
+- Layout : Componentes estruturais como Header e Sidebar
+## Conclusão
+O HypeCRM é um sistema completo para gestão de relacionamento com clientes, focado em empresas que trabalham com propostas e contratos. A aplicação possui uma interface moderna, sistema de autenticação, e funcionalidades específicas para cada etapa do processo comercial, desde a prospecção até o faturamento.

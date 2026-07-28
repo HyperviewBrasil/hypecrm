@@ -244,7 +244,7 @@ const ClientList: React.FC<{
         />
       </Modal>
 
-       <Modal isOpen={!!clientToUpdateStatus} onClose={() => setClientToUpdateStatus(null)} title={clientToUpdateStatus?.status_texto !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Reativação'}>
+       <Modal isOpen={!!clientToUpdateStatus} onClose={() => setClientToUpdateStatus(null)} title={clientToUpdateStatus?.status_texto !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Reativação'} closeOnBackdrop>
             <div>
                 <p className="text-gray-300 mb-6">
                     {clientToUpdateStatus?.status_texto !== 'Arquivado' ? 

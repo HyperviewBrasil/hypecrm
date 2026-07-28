@@ -140,8 +140,9 @@ export const updateFinancialRecord = async (recordId: string, formData: Financia
     // The backend trigger is now the single source of truth for this value.
     const { billing_status, ...restOfFormData } = formData;
 
-    // FIX: Remove client-side only 'id' properties from nested arrays before sending to Supabase
-    const cleanInstallments = (formData.installments ?? []).map(({ id, ...rest }) => rest);
+    // FIX: Remove client-side only 'id' properties from custom expenses before sending to Supabase.
+    // Installments keep their 'id' so the backend can identify individual parcels.
+    const cleanInstallments = formData.installments ?? [];
     const cleanCustomExpenses = (formData.custom_expenses ?? []).map(({ id, ...rest }) => rest);
 
     const updatePayload = {

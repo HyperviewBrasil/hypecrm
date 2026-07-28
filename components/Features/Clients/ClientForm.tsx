@@ -176,7 +176,7 @@ const ClientForm: React.FC<ClientFormProps> = ({ clientToEdit, onSubmit, onCance
     <form onSubmit={handleSubmit}>
       <FormSection title="Contato Principal">
         <InputField label="Nome do Contato" id="contact_name" name="contact_name" value={formData.contact_name} onChange={handleChange} required containerClassName="md:col-span-1" />
-        <InputField label="WhatsApp" id="contact_whatsapp" name="contact_whatsapp" value={formData.contact_whatsapp} onChange={handleChange} required />
+        <InputField label="WhatsApp" id="contact_whatsapp" name="contact_whatsapp" value={formData.contact_whatsapp} onChange={handleChange} />
         <InputField label="E-mail" id="contact_email" name="contact_email" type="email" value={formData.contact_email} onChange={handleChange} />
       </FormSection>
 

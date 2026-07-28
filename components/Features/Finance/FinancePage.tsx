@@ -268,7 +268,7 @@ const FinancePage: React.FC = () => {
                 )}
             </Modal>
             
-            <Modal isOpen={!!recordToUpdateStatus} onClose={() => setRecordToUpdateStatus(null)} title={recordToUpdateStatus?.billing_status !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Desarquivamento'}>
+            <Modal isOpen={!!recordToUpdateStatus} onClose={() => setRecordToUpdateStatus(null)} title={recordToUpdateStatus?.billing_status !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Desarquivamento'} closeOnBackdrop>
                 <div>
                     <p className="text-gray-300 mb-6">
                         {recordToUpdateStatus?.billing_status !== 'Arquivado' ? 

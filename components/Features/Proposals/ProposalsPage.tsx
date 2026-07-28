@@ -261,8 +261,8 @@ const ProposalsPage: React.FC<ProposalsPageProps> = ({ onGenerateContract, isCre
         </div>
       )}
 
-      <div className="p-4 md:p-6 print-hidden">
-        <div className="flex flex-col md:flex-row justify-between md:items-center mb-4 gap-4">
+      <div className="p-2 md:p-3 print-hidden">
+        <div className="flex flex-col md:flex-row justify-between md:items-center mb-2 gap-2">
             <h1 className="text-xl md:text-2xl font-semibold text-white">Lista de Propostas</h1>
             <div className="flex flex-wrap md:flex-nowrap items-center gap-2 w-full md:w-auto">
                 <div className="relative w-full md:w-auto md:flex-grow">
@@ -290,7 +290,7 @@ const ProposalsPage: React.FC<ProposalsPageProps> = ({ onGenerateContract, isCre
         </div>
 
         {showFilters && (
-            <div className="bg-gray-800/50 p-4 rounded-lg mb-4 flex flex-col sm:flex-row items-center gap-4">
+            <div className="bg-gray-800/50 p-2 md:p-3 rounded-lg mb-2 flex flex-col sm:flex-row items-center gap-2">
                 <div className="w-full sm:w-auto">
                     <label htmlFor="status-filter" className="block text-sm font-medium text-gray-400 mb-1">Status</label>
                     <select
@@ -321,37 +321,37 @@ const ProposalsPage: React.FC<ProposalsPageProps> = ({ onGenerateContract, isCre
           {filteredProposals.length > 0 ? (
             <>
               {/* Desktop Table View */}
-              <div className="hidden md:block bg-gray-800 shadow-md rounded-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-700">
-                  <thead className="bg-gray-700/50">
+              <div className="hidden md:block bg-gray-800/50 rounded-lg border border-gray-700/50 backdrop-blur-sm overflow-hidden">
+                <table className="w-full text-xs divide-y divide-gray-700/30">
+                  <thead className="bg-gray-700/50 border-b border-gray-700/50">
                     <tr>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Código</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cliente</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Valor Total</th>
-                      <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
-                      <th scope="col" className="relative px-6 py-3"><span className="sr-only">Ações</span></th>
+                      <th className="px-2 py-1.5 text-left font-semibold text-gray-300 text-xs">Código</th>
+                      <th className="px-2 py-1.5 text-left font-semibold text-gray-300 text-xs">Cliente</th>
+                      <th className="px-2 py-1.5 text-right font-semibold text-gray-300 text-xs">Valor</th>
+                      <th className="px-2 py-1.5 text-left font-semibold text-gray-300 text-xs">Status</th>
+                      <th className="px-2 py-1.5 text-center font-semibold text-gray-300 text-xs">Ações</th>
                     </tr>
                   </thead>
-                  <tbody className="bg-gray-800 divide-y divide-gray-700">
+                  <tbody className="divide-y divide-gray-700/30">
                     {filteredProposals.map((proposal) => (
-                        <tr key={proposal.proposal_id} className={`hover:bg-gray-700/50 transition-all duration-200 ${proposal.status === 'Arquivado' ? 'opacity-60' : ''}`}>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white font-mono">{proposal.proposal_code}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{proposal.empresas_unidades?.nome_fantasia || proposal.empresas_unidades?.razao_social || 'Cliente não encontrado'}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-semibold">{formatCurrency(proposal.total_value)}</td>
-                          <td className="px-6 py-4 whitespace-nowrap text-sm">
-                              <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyles(proposal.status).bg}`}>
+                        <tr key={proposal.proposal_id} className={`hover:bg-gray-700/30 transition-colors text-xs ${proposal.status === 'Arquivado' ? 'opacity-60' : ''}`}>
+                          <td className="px-2 py-1 text-xs font-mono text-gray-200">{proposal.proposal_code}</td>
+                          <td className="px-2 py-1 text-xs text-gray-200 truncate max-w-[120px]">{proposal.empresas_unidades?.nome_fantasia || proposal.empresas_unidades?.razao_social || 'N/A'}</td>
+                          <td className="px-2 py-1 text-xs text-right text-gray-200 font-semibold whitespace-nowrap">{formatCurrency(proposal.total_value)}</td>
+                          <td className="px-2 py-1 text-xs">
+                              <span className={`px-1 py-0.5 text-xs font-semibold rounded inline-block ${getStatusStyles(proposal.status).bg}`}>
                                 {proposal.status}
                               </span>
                           </td>
-                          <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                              <div className="flex justify-end items-center gap-4">
+                          <td className="px-2 py-1 text-center">
+                              <div className="flex justify-center items-center gap-0.5">
                                 {proposal.status === 'Aprovado' && (
-                                  <button onClick={() => onGenerateContract(proposal)} className="text-purple-400 hover:text-purple-300 transition-colors" title="Gerar Contrato"> <FiPenTool size={18} /> </button>
+                                  <button onClick={() => onGenerateContract(proposal)} className="text-gray-400 hover:text-purple-300 p-0.5" title="Gerar Contrato"> <FiPenTool size={12} /> </button>
                                 )}
-                                <button onClick={() => handleOpenShareModal(proposal)} className="text-green-400 hover:text-green-300 transition-colors" title="Compartilhar"> <FiShare2 size={18} /> </button>
-                                <button onClick={() => handleOpenModalForEdit(proposal)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar"> <FiEdit size={18} /> </button>
-                                <button onClick={() => setProposalToUpdateStatus(proposal)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title={proposal.status === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
-                                    {proposal.status === 'Arquivado' ? <FiUnlock size={18} /> : <FiArchive size={18} />}
+                                <button onClick={() => handleOpenShareModal(proposal)} className="text-gray-400 hover:text-green-300 p-0.5" title="Compartilhar"> <FiShare2 size={12} /> </button>
+                                <button onClick={() => handleOpenModalForEdit(proposal)} className="text-gray-400 hover:text-blue-300 p-0.5" title="Editar"> <FiEdit size={12} /> </button>
+                                <button onClick={() => setProposalToUpdateStatus(proposal)} className="text-gray-400 hover:text-yellow-300 p-0.5" title={proposal.status === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
+                                    {proposal.status === 'Arquivado' ? <FiUnlock size={12} /> : <FiArchive size={12} />}
                                 </button>
                               </div>
                           </td>
@@ -442,7 +442,7 @@ const ProposalsPage: React.FC<ProposalsPageProps> = ({ onGenerateContract, isCre
           />
         </Modal>
 
-        <Modal isOpen={!!proposalToUpdateStatus} onClose={() => setProposalToUpdateStatus(null)} title={proposalToUpdateStatus?.status !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Desarquivamento'}>
+        <Modal isOpen={!!proposalToUpdateStatus} onClose={() => setProposalToUpdateStatus(null)} title={proposalToUpdateStatus?.status !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Desarquivamento'} closeOnBackdrop>
               <div>
                   <p className="text-gray-300 mb-6">
                       {proposalToUpdateStatus?.status !== 'Arquivado' ? 

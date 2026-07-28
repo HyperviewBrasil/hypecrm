@@ -58,10 +58,15 @@ function App() {
     // Listen for auth state changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (_event, session) => {
-        setSession(session);
-        if (_event === 'SIGNED_IN') {
-          setCurrentView('dashboard'); // Default to dashboard view on login
-        }
+        setSession(prevSession => {
+          // Só muda a tela para dashboard se o usuário REALMENTE acabou de fazer login
+          // (transição de prevSession === null para session !== null)
+          if (_event === 'SIGNED_IN' && !prevSession && session) {
+            setCurrentView('dashboard');
+          }
+          return session;
+        });
+
         if (_event === 'SIGNED_OUT') {
           setPublicView('landing'); // Default to landing on logout
         }
@@ -177,8 +182,10 @@ function App() {
       />
       <div className="flex-1 flex flex-col overflow-hidden">
         <Header session={session} onMenuClick={() => setSidebarOpen(true)} />
-        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-900">
-          {renderCurrentView()}
+        <main className="flex-1 overflow-x-hidden overflow-y-auto bg-gray-900 w-full">
+          <div className="w-full h-full">
+            {renderCurrentView()}
+          </div>
         </main>
       </div>
     </div>

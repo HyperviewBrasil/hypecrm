@@ -29,9 +29,15 @@ const TextareaField: React.FC<React.TextareaHTMLAttributes<HTMLTextAreaElement> 
 );
 
 const FinancialRecordForm: React.FC<FinancialRecordFormProps> = ({ record, onCancel, onSuccess }) => {
+    // Ensure all installments have stable IDs for React rendering and toggle logic
+    const installmentsWithIds = (record.installments ?? []).map((inst, idx) => ({
+        ...inst,
+        id: inst.id || `installment-${record.financial_record_id}-${idx}`
+    }));
+
     const [formData, setFormData] = useState<FinancialRecordFormData>({
         billing_status: record.billing_status,
-        installments: record.installments,
+        installments: installmentsWithIds,
         receiving_account: record.receiving_account,
         payment_instructions: record.payment_instructions,
         expenses_accommodation: record.expenses_accommodation ?? 0,

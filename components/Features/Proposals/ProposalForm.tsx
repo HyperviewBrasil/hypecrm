@@ -78,9 +78,14 @@ const ProposalForm: React.FC<ProposalFormProps> = ({ proposalToEdit, onSubmit, o
     fetchClientsData();
   }, [addToast]);
   
-  // Click outside handler for search results
+  // Click outside handler for search results - only affects search, not modal
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
+      // Only close search if clicking outside AND not on the modal
+      const modalElement = document.querySelector('.fixed.inset-0.z-50');
+      if (modalElement && modalElement.contains(event.target as Node)) {
+        return; // Click is inside modal, do nothing
+      }
       if (searchWrapperRef.current && !searchWrapperRef.current.contains(event.target as Node)) {
         setIsSearchFocused(false);
       }

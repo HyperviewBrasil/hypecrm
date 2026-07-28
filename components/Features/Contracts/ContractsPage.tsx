@@ -282,7 +282,7 @@ const ContractsPage: React.FC<ContractsPageProps> = ({ proposalForContract, onCo
           />
         </Modal>
 
-        <Modal isOpen={!!contractToUpdateStatus} onClose={() => setContractToUpdateStatus(null)} title={contractToUpdateStatus?.status !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Desarquivamento'}>
+        <Modal isOpen={!!contractToUpdateStatus} onClose={() => setContractToUpdateStatus(null)} title={contractToUpdateStatus?.status !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Desarquivamento'} closeOnBackdrop>
             <div>
                 <p className="text-gray-300 mb-6">
                     {contractToUpdateStatus?.status !== 'Arquivado' ? 

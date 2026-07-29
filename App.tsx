@@ -19,9 +19,10 @@ import ContractTrackerPage from './components/Features/Contracts/ContractTracker
 import DashboardPage from './components/Features/Dashboard/DashboardPage';
 import HypePage from './components/Features/Public/HypePage';
 import InvoiceTrackerPage from './components/Features/Finance/InvoiceTrackerPage';
+import ClientMappingPage from './components/Features/Clients/ClientMappingPage';
 
-// View type for navigation, exported for use in other components like Sidebar
-export type View = 'dashboard' | 'clients' | 'proposals' | 'contracts' | 'finance' | 'settings';
+// View type for navigation
+export type View = 'dashboard' | 'clients' | 'proposals' | 'contracts' | 'finance' | 'settings' | 'client_mapping';
 export type PublicView = 'landing' | 'login' | 'proposal_tracker' | 'contract_tracker' | 'hype' | 'invoice_tracker';
 
 function App() {
@@ -140,6 +141,8 @@ function App() {
         return <FinancePage />;
       case 'settings':
         return <SettingsPage />;
+      case 'client_mapping':
+        return <ClientMappingPage />;
       default:
         return <DashboardPage onNavigateToNewProposal={handleGoToNewProposal} onNavigateToNewClient={handleGoToNewClient} />;
     }

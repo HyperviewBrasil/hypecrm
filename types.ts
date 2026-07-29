@@ -25,6 +25,7 @@ export interface EmpresaUnidade {
   cnae_principal_texto: string | null;
   inserted_by: string;
   data_atualizacao: string;
+  asaas_customer_id?: string | null;
 }
 
 // In ClientForm, a Partial is used for editing and creating. 
@@ -189,14 +190,15 @@ export interface FinancialRecordFormData {
 
 export interface FinancialRecord extends FinancialRecordFormData {
     financial_record_id: string;
-    contract_id: string;
+    contract_id: string | null;
     public_access_id: string;
     total_revenue: number;
     total_expenses: number;
     net_profit: number;
     created_at: string;
     payment_instructions: string | null;
-    contracts: Contract; // Nested contract data
+    contracts: Contract | null;
+    description?: string | null;
 }
 
 // --- Site Content ---

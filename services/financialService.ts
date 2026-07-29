@@ -15,7 +15,8 @@ export const getFinancialRecords = async (): Promise<FinancialRecord[]> => {
           *,
           empresas_unidades (*)
         )
-      )
+      ),
+      empresas_unidades (*)
     `)
     .order('created_at', { ascending: false });
 
@@ -24,7 +25,7 @@ export const getFinancialRecords = async (): Promise<FinancialRecord[]> => {
     throw new Error(`Falha ao carregar registros financeiros: ${error.message}`);
   }
 
-  // Supabase typing can be tricky with nested joins, so we cast here.
+  // Cast safely
   return (data as any) || [];
 };
 
@@ -42,7 +43,8 @@ export const getFinancialRecordByPublicId = async (publicId: string): Promise<Fi
           *,
           empresas_unidades (*)
         )
-      )
+      ),
+      empresas_unidades (*)
     `)
     .eq('public_access_id', publicId)
     .single();
@@ -71,12 +73,11 @@ export const createInvoice = async (
 ): Promise<FinancialRecord> => {
     const newRecordData = {
         contract_id: contract.contract_id,
-        billing_status: 'Pendente', // The trigger will correct this based on installments
+        billing_status: 'Pendente',
         total_revenue: contract.contract_value,
-        installments: installments.map(({ id, ...rest }) => rest), // remove client-side ID
+        installments: installments.map(({ id, ...rest }) => rest),
         receiving_account: receivingAccount,
         payment_instructions: paymentInstructions,
-        // Initialize all expense fields
         expenses_accommodation: 0,
         expenses_transport: 0,
         expenses_tax_percent: 0,
@@ -86,7 +87,6 @@ export const createInvoice = async (
         reimbursement_daniel: 0,
         reimbursement_natan: 0,
         custom_expenses: [],
-        // Calculated fields will be updated on the server or via a view/trigger
         total_expenses: 0,
         net_profit: contract.contract_value,
     };
@@ -100,6 +100,53 @@ export const createInvoice = async (
     if (error) {
         console.error('Error creating invoice record:', error);
         throw new Error('Falha ao criar a fatura.');
+    }
+
+    return data;
+};
+
+/**
+ * Creates a new loose invoice (not attached to a contract).
+ */
+export const createLooseInvoice = async (
+    clientId: string,
+    totalValue: number,
+    installments: Installment[],
+    receivingAccount: 'Conta Daniel' | 'Conta Natan',
+    paymentInstructions: string | null,
+    description: string | null
+): Promise<FinancialRecord> => {
+    const newRecordData = {
+        contract_id: null,
+        client_id: clientId,
+        billing_status: 'Pendente',
+        total_revenue: totalValue,
+        description: description || null,
+        installments: installments.map(({ id, ...rest }) => rest),
+        receiving_account: receivingAccount,
+        payment_instructions: paymentInstructions,
+        expenses_accommodation: 0,
+        expenses_transport: 0,
+        expenses_tax_percent: 0,
+        expenses_third_party: 0,
+        expenses_materials: 0,
+        expenses_miscellaneous: 0,
+        reimbursement_daniel: 0,
+        reimbursement_natan: 0,
+        custom_expenses: [],
+        total_expenses: 0,
+        net_profit: totalValue,
+    };
+
+    const { data, error } = await supabase
+        .from('financial_records')
+        .insert(newRecordData)
+        .select()
+        .single();
+
+    if (error) {
+        console.error('Error creating loose invoice:', error);
+        throw new Error('Falha ao criar fatura avulsa.');
     }
 
     return data;

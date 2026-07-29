@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { Contract, Installment } from '../../../types';
+import { Contract, Installment, EmpresaUnidade } from '../../../types';
 import { getContractsForInvoiceCreation } from '../../../services/contractService';
-import { createInvoice } from '../../../services/financialService';
+import { getClients } from '../../../services/clientService';
+import { createInvoice, createLooseInvoice } from '../../../services/financialService';
 import Modal from '../../UI/Modal';
 import Button from '../../UI/Button';
 import { useToast } from '../../../contexts/ToastContext';
@@ -17,33 +18,58 @@ interface CreateInvoiceModalProps {
 const formatCurrency = (value: number) => new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
 
 const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ isOpen, onClose, onSuccess }) => {
+    // Mode toggle: 'contract' | 'loose'
+    const [invoiceMode, setInvoiceMode] = useState<'contract' | 'loose'>('contract');
+
+    // Contract Mode State
     const [contracts, setContracts] = useState<Contract[]>([]);
     const [isLoadingContracts, setIsLoadingContracts] = useState(true);
     const [selectedContract, setSelectedContract] = useState<Contract | null>(null);
+
+    // Loose Mode State
+    const [clients, setClients] = useState<EmpresaUnidade[]>([]);
+    const [isLoadingClients, setIsLoadingClients] = useState(true);
+    const [selectedClientId, setSelectedClientId] = useState('');
+    const [looseTotalValue, setLooseTotalValue] = useState<number>(0);
+    const [looseDescription, setLooseDescription] = useState('');
+
+    // Shared State
     const [installments, setInstallments] = useState<Installment[]>([]);
     const [receivingAccount, setReceivingAccount] = useState<'Conta Daniel' | 'Conta Natan' | ''>('');
     const [paymentInstructions, setPaymentInstructions] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
+    
     const { addToast } = useToast();
     const { settings } = useSettings();
 
+    // Fetch lists
     useEffect(() => {
         if (isOpen) {
-            const fetchContracts = async () => {
+            const fetchData = async () => {
                 setIsLoadingContracts(true);
+                setIsLoadingClients(true);
                 try {
-                    const availableContracts = await getContractsForInvoiceCreation();
+                    const [availableContracts, availableClients] = await Promise.all([
+                        getContractsForInvoiceCreation(),
+                        getClients()
+                    ]);
                     setContracts(availableContracts);
+                    setClients(availableClients);
                 } catch (err: any) {
                     addToast(err.message, 'error');
                 } finally {
                     setIsLoadingContracts(false);
+                    setIsLoadingClients(false);
                 }
             };
-            fetchContracts();
+            fetchData();
         } else {
             // Reset state on close
+            setInvoiceMode('contract');
             setSelectedContract(null);
+            setSelectedClientId('');
+            setLooseTotalValue(0);
+            setLooseDescription('');
             setInstallments([]);
             setReceivingAccount('');
             setPaymentInstructions('');
@@ -59,11 +85,12 @@ const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ isOpen, onClose
         }
     }, [receivingAccount, settings]);
 
+    // Handle contract selection
     const handleContractSelect = (contractId: string) => {
         const contract = contracts.find(c => c.contract_id === contractId);
         if (contract) {
             setSelectedContract(contract);
-            // Default to one installment
+            // Default to one installment with full contract value
             const defaultDueDate = new Date();
             defaultDueDate.setDate(defaultDueDate.getDate() + 7);
             setInstallments([{
@@ -74,7 +101,23 @@ const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ isOpen, onClose
             }]);
         }
     };
-    
+
+    // Handle loose mode total value change (pre-populates first installment if only one exists)
+    const handleLooseTotalValueChange = (val: string) => {
+        const numericVal = parseFloat(val) || 0;
+        setLooseTotalValue(numericVal);
+        if (installments.length <= 1) {
+            const defaultDueDate = new Date();
+            defaultDueDate.setDate(defaultDueDate.getDate() + 7);
+            setInstallments([{
+                id: installments[0]?.id || crypto.randomUUID(),
+                due_date: installments[0]?.due_date || defaultDueDate.toISOString().split('T')[0],
+                value: numericVal,
+                status: 'Pendente'
+            }]);
+        }
+    };
+
     const totalInstallmentValue = useMemo(() => {
         return installments.reduce((sum, i) => sum + (Number(i.value) || 0), 0);
     }, [installments]);
@@ -104,12 +147,23 @@ const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ isOpen, onClose
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!selectedContract) {
+        // Target total value to validate against
+        const targetValue = invoiceMode === 'contract' ? (selectedContract?.contract_value || 0) : looseTotalValue;
+
+        if (invoiceMode === 'contract' && !selectedContract) {
             addToast('Selecione um contrato.', 'error');
             return;
         }
-        if (Math.abs(totalInstallmentValue - selectedContract.contract_value) > 0.01) {
-            addToast('A soma das parcelas não bate com o valor do contrato.', 'error');
+        if (invoiceMode === 'loose' && !selectedClientId) {
+            addToast('Selecione um cliente.', 'error');
+            return;
+        }
+        if (invoiceMode === 'loose' && targetValue <= 0) {
+            addToast('Insira um valor válido para a fatura.', 'error');
+            return;
+        }
+        if (Math.abs(totalInstallmentValue - targetValue) > 0.01) {
+            addToast('A soma das parcelas não bate com o valor total da fatura.', 'error');
             return;
         }
         if (!receivingAccount) {
@@ -119,7 +173,11 @@ const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ isOpen, onClose
 
         setIsSubmitting(true);
         try {
-            await createInvoice(selectedContract, installments, receivingAccount, paymentInstructions);
+            if (invoiceMode === 'contract') {
+                await createInvoice(selectedContract!, installments, receivingAccount, paymentInstructions);
+            } else {
+                await createLooseInvoice(selectedClientId, looseTotalValue, installments, receivingAccount, paymentInstructions, looseDescription);
+            }
             addToast('Fatura criada com sucesso!', 'success');
             onSuccess();
         } catch (err: any) {
@@ -129,40 +187,132 @@ const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ isOpen, onClose
         }
     };
     
-    const valueDifference = selectedContract ? selectedContract.contract_value - totalInstallmentValue : 0;
+    const targetValue = invoiceMode === 'contract' ? (selectedContract?.contract_value || 0) : looseTotalValue;
+    const valueDifference = targetValue - totalInstallmentValue;
     const isValueMismatch = Math.abs(valueDifference) > 0.01;
 
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Criar Nova Fatura">
             <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <label htmlFor="contract-select" className="block text-sm font-medium text-gray-400 mb-1">Selecione o Contrato</label>
-                    <select
-                        id="contract-select"
-                        onChange={(e) => handleContractSelect(e.target.value)}
-                        className="w-full px-3 py-2 border bg-gray-700 border-gray-600 text-white rounded-md"
-                        disabled={isLoadingContracts || !!selectedContract}
-                        value={selectedContract?.contract_id || ''}
+                
+                {/* Mode Selector */}
+                <div className="flex bg-gray-900/60 p-1 rounded-lg">
+                    <button
+                        type="button"
+                        onClick={() => { setInvoiceMode('contract'); setInstallments([]); setSelectedContract(null); }}
+                        className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${invoiceMode === 'contract' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
                     >
-                        <option value="" disabled>{isLoadingContracts ? 'Carregando...' : 'Selecione...'}</option>
-                        {contracts.map(c => (
-                            <option key={c.contract_id} value={c.contract_id}>
-                                {c.contract_code} - {c.proposals?.empresas_unidades?.nome_fantasia}
-                            </option>
-                        ))}
-                    </select>
+                        Vincular a Contrato
+                    </button>
+                    <button
+                        type="button"
+                        onClick={() => { setInvoiceMode('loose'); setInstallments([]); setSelectedClientId(''); setLooseTotalValue(0); }}
+                        className={`flex-1 py-1.5 text-sm font-medium rounded-md transition-colors ${invoiceMode === 'loose' ? 'bg-blue-600 text-white' : 'text-gray-400 hover:text-white'}`}
+                    >
+                        Fatura Avulsa
+                    </button>
                 </div>
 
-                {selectedContract && (
+                {/* Contract Selection Mode */}
+                {invoiceMode === 'contract' && (
+                    <div>
+                        <label htmlFor="contract-select" className="block text-sm font-medium text-gray-400 mb-1">Selecione o Contrato</label>
+                        <select
+                            id="contract-select"
+                            onChange={(e) => handleContractSelect(e.target.value)}
+                            className="w-full px-3 py-2 border bg-gray-700 border-gray-600 text-white rounded-md focus:ring-blue-500 focus:border-blue-500"
+                            disabled={isLoadingContracts || !!selectedContract}
+                            value={selectedContract?.contract_id || ''}
+                        >
+                            <option value="" disabled>{isLoadingContracts ? 'Carregando...' : 'Selecione...'}</option>
+                            {contracts.map(c => (
+                                <option key={c.contract_id} value={c.contract_id}>
+                                    {c.contract_code} - {c.proposals?.empresas_unidades?.nome_fantasia || c.proposals?.empresas_unidades?.razao_social}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+                )}
+
+                {/* Loose Selection Mode */}
+                {invoiceMode === 'loose' && (
+                    <div className="space-y-4 animate-fade-in">
+                        <div>
+                            <label htmlFor="client-select" className="block text-sm font-medium text-gray-400 mb-1">Selecione o Cliente</label>
+                            <select
+                                id="client-select"
+                                onChange={(e) => {
+                                    setSelectedClientId(e.target.value);
+                                    // Start with 1 installment if none
+                                    if (installments.length === 0) {
+                                        const defaultDueDate = new Date();
+                                        defaultDueDate.setDate(defaultDueDate.getDate() + 7);
+                                        setInstallments([{
+                                            id: crypto.randomUUID(),
+                                            due_date: defaultDueDate.toISOString().split('T')[0],
+                                            value: looseTotalValue,
+                                            status: 'Pendente'
+                                        }]);
+                                    }
+                                }}
+                                className="w-full px-3 py-2 border bg-gray-700 border-gray-600 text-white rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                value={selectedClientId}
+                            >
+                                <option value="" disabled>{isLoadingClients ? 'Carregando...' : 'Selecione...'}</option>
+                                {clients.map(cl => (
+                                    <option key={cl.client_id} value={cl.client_id}>
+                                        {cl.nome_fantasia || cl.razao_social || cl.contact_name}
+                                    </option>
+                                ))}
+                            </select>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label htmlFor="loose-value" className="block text-sm font-medium text-gray-400 mb-1">Valor Total</label>
+                                <input
+                                    id="loose-value"
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="R$ 0,00"
+                                    onChange={(e) => handleLooseTotalValueChange(e.target.value)}
+                                    value={looseTotalValue || ''}
+                                    className="w-full px-3 py-2 border bg-gray-700 border-gray-600 text-white rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                            <div>
+                                <label htmlFor="loose-desc" className="block text-sm font-medium text-gray-400 mb-1">Descrição do Serviço (Opcional)</label>
+                                <input
+                                    id="loose-desc"
+                                    type="text"
+                                    placeholder="Ex: Consultoria, Licença..."
+                                    onChange={(e) => setLooseDescription(e.target.value)}
+                                    value={looseDescription}
+                                    className="w-full px-3 py-2 border bg-gray-700 border-gray-600 text-white rounded-md focus:ring-blue-500 focus:border-blue-500"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Show common details if contract is selected OR loose client + value are defined */}
+                {((invoiceMode === 'contract' && selectedContract) || (invoiceMode === 'loose' && selectedClientId && looseTotalValue > 0)) && (
                     <div className="bg-gray-900/50 p-4 rounded-lg space-y-4 animate-fade-in">
                         <div className="flex justify-between items-center">
                             <div>
-                                <h3 className="text-lg font-semibold text-white">{selectedContract.contract_code}</h3>
-                                <p className="text-sm text-gray-400">{selectedContract.proposals?.empresas_unidades?.nome_fantasia}</p>
+                                <h3 className="text-lg font-semibold text-white">
+                                    {invoiceMode === 'contract' ? selectedContract?.contract_code : 'Fatura Avulsa'}
+                                </h3>
+                                <p className="text-sm text-gray-400">
+                                    {invoiceMode === 'contract' 
+                                        ? (selectedContract?.proposals?.empresas_unidades?.nome_fantasia || selectedContract?.proposals?.empresas_unidades?.razao_social)
+                                        : clients.find(cl => cl.client_id === selectedClientId)?.nome_fantasia || clients.find(cl => cl.client_id === selectedClientId)?.razao_social
+                                    }
+                                </p>
                             </div>
                             <div className="text-right">
                                 <p className="text-sm text-gray-400">Valor Total</p>
-                                <p className="text-xl font-bold text-blue-400">{formatCurrency(selectedContract.contract_value)}</p>
+                                <p className="text-xl font-bold text-blue-400">{formatCurrency(targetValue)}</p>
                             </div>
                         </div>
 
@@ -181,7 +331,7 @@ const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ isOpen, onClose
                         </div>
 
                         <div className={`p-2 rounded-md text-sm text-center font-semibold ${isValueMismatch ? 'bg-red-900/50 text-red-300' : 'bg-green-900/50 text-green-300'}`}>
-                            {isValueMismatch ? `Diferença: ${formatCurrency(valueDifference)}` : 'Total das parcelas corresponde ao valor do contrato'}
+                            {isValueMismatch ? `Diferença: ${formatCurrency(valueDifference)}` : 'Total das parcelas corresponde ao valor total'}
                         </div>
                         
                          <div>
@@ -216,7 +366,7 @@ const CreateInvoiceModal: React.FC<CreateInvoiceModalProps> = ({ isOpen, onClose
                     <Button type="button" variant="secondary" onClick={onClose} disabled={isSubmitting}>
                         Cancelar
                     </Button>
-                    <Button type="submit" variant="primary" disabled={isSubmitting || !selectedContract || isValueMismatch || !receivingAccount}>
+                    <Button type="submit" variant="primary" disabled={isSubmitting || !receivingAccount || isValueMismatch || (invoiceMode === 'contract' && !selectedContract) || (invoiceMode === 'loose' && (!selectedClientId || looseTotalValue <= 0))}>
                         <FiFileText className="mr-2" />
                         {isSubmitting ? 'Salvando...' : 'Salvar Fatura'}
                     </Button>

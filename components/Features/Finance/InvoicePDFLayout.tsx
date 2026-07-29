@@ -18,7 +18,7 @@ const formatTimestamp = (dateString: string | null) => {
 
 
 const InvoicePDFLayout: React.FC<{ record: FinancialRecord }> = ({ record }) => {
-    const client = record.contracts.proposals?.empresas_unidades;
+    const client = record.contracts?.proposals?.empresas_unidades || record.empresas_unidades;
 
     return (
         <div className="bg-white text-gray-800 p-8 md:p-12 font-sans">
@@ -35,10 +35,21 @@ const InvoicePDFLayout: React.FC<{ record: FinancialRecord }> = ({ record }) => 
                 <div className="text-right">
                     <h2 className="text-3xl font-bold tracking-wider text-black">FATURA</h2>
                     <div className="text-sm text-gray-500 mt-2 space-y-1">
-                        <p>Contrato: <span className="font-semibold text-gray-700">{record.contracts.contract_code}</span></p>
-                        <p>Proposta: <span className="font-semibold text-gray-700">{record.contracts.proposals?.proposal_code}</span></p>
-                         {record.contracts.purchase_order && (
-                            <p>O.C.: <span className="font-semibold text-gray-700">{record.contracts.purchase_order}</span></p>
+                        {record.contracts ? (
+                            <>
+                                <p>Contrato: <span className="font-semibold text-gray-700">{record.contracts.contract_code}</span></p>
+                                <p>Proposta: <span className="font-semibold text-gray-700">{record.contracts.proposals?.proposal_code}</span></p>
+                                {record.contracts.purchase_order && (
+                                    <p>O.C.: <span className="font-semibold text-gray-700">{record.contracts.purchase_order}</span></p>
+                                )}
+                            </>
+                        ) : (
+                            <>
+                                <p>Fatura: <span className="font-semibold text-gray-700">AVULSA</span></p>
+                                {record.description && (
+                                    <p>Serviço: <span className="font-semibold text-gray-700">{record.description}</span></p>
+                                )}
+                            </>
                         )}
                     </div>
                 </div>
@@ -51,7 +62,9 @@ const InvoicePDFLayout: React.FC<{ record: FinancialRecord }> = ({ record }) => 
                     {client?.razao_social && client.razao_social !== client.nome_fantasia && (
                         <p className="text-gray-600">{client.razao_social}</p>
                     )}
-                    <p className="text-gray-600">CNPJ: {client?.cnpj_unidade}</p>
+                    {client?.cnpj_unidade && (
+                        <p className="text-gray-600">CNPJ: {client.cnpj_unidade}</p>
+                    )}
                 </div>
                 <div className="text-right">
                     <h3 className="text-sm uppercase font-bold text-gray-400 tracking-wider mb-2">DATA DE EMISSÃO</h3>
@@ -70,7 +83,12 @@ const InvoicePDFLayout: React.FC<{ record: FinancialRecord }> = ({ record }) => 
                 <tbody>
                     {record.installments.map((inst, index) => (
                         <tr key={inst.id || index} className="border-b border-gray-100">
-                            <td className="p-3 text-gray-800">Referente à Parcela do Contrato {record.contracts.contract_code}</td>
+                            <td className="p-3 text-gray-800">
+                                {record.contracts 
+                                    ? `Referente à Parcela do Contrato ${record.contracts.contract_code}`
+                                    : `Referente à Parcela da Fatura Avulsa`
+                                }
+                            </td>
                             <td className="p-3 text-gray-800 text-right">{formatDate(inst.due_date)}</td>
                             <td className="p-3 text-gray-800 text-right font-semibold">{formatCurrency(inst.value)}</td>
                         </tr>
@@ -98,7 +116,7 @@ const InvoicePDFLayout: React.FC<{ record: FinancialRecord }> = ({ record }) => 
             )}
 
             {/* Caixa de Destaque para Observações Adicionais */}
-            {record.contracts.additional_info && (
+            {record.contracts?.additional_info && (
                 <section className="mt-6">
                     <h4 className="font-bold text-sm text-gray-700 mb-2 uppercase tracking-wider">Observações Adicionais (do Contrato)</h4>
                      <div className="bg-gray-100 border-l-4 border-gray-500 rounded-r-lg p-4 text-sm text-gray-800">

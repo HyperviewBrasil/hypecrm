@@ -1,5 +1,5 @@
 import React from 'react';
-import { FiX, FiUsers, FiFileText, FiLogOut, FiPenTool, FiSettings, FiHome, FiBriefcase } from 'react-icons/fi';
+import { FiX, FiUsers, FiFileText, FiLogOut, FiPenTool, FiSettings, FiHome, FiBriefcase, FiDatabase } from 'react-icons/fi';
 import { supabase } from '../../services/supabaseClient';
 import { View } from '../../App';
 
@@ -106,18 +106,25 @@ const Sidebar: React.FC<SidebarProps> = ({ isOpen, setOpen, setView, currentView
                 onClick={() => handleSetView('contracts')}
             />
             <NavItem
-                icon={FiBriefcase}
-                label="Financeiro"
-                view="finance"
-                currentView={currentView}
-                onClick={() => handleSetView('finance')}
+               icon={FiBriefcase}
+               label="Financeiro"
+               view="finance"
+               currentView={currentView}
+               onClick={() => handleSetView('finance')}
             />
-             <NavItem
-                icon={FiSettings}
-                label="Configurações"
-                view="settings"
-                currentView={currentView}
-                onClick={() => handleSetView('settings')}
+            <NavItem
+               icon={FiDatabase}
+               label="Mapeamento Asaas"
+               view="client_mapping"
+               currentView={currentView}
+               onClick={() => handleSetView('client_mapping')}
+            />
+            <NavItem
+               icon={FiSettings}
+               label="Configurações"
+               view="settings"
+               currentView={currentView}
+               onClick={() => handleSetView('settings')}
             />
           </ul>
 

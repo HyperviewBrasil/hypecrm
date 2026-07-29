@@ -6,6 +6,7 @@ import {
   updateClient,
   updateClientStatus,
 } from '../../../services/clientService';
+import { syncClientWithAsaas } from '../../../services/asaasService';
 import { EmpresaUnidade, EmpresaUnidadeFormData } from '../../../types';
 import Button from '../../UI/Button';
 import Modal from '../../UI/Modal';
@@ -95,15 +96,31 @@ const ClientList: React.FC<{
   const handleSubmit = async (formData: EmpresaUnidadeFormData) => {
     setIsSubmitting(true);
     try {
+      let savedClient: EmpresaUnidade;
       if (clientToEdit && 'client_id' in clientToEdit) {
-        await updateClient(clientToEdit.client_id, formData);
+        savedClient = await updateClient(clientToEdit.client_id, formData);
         addToast('Cliente atualizado com sucesso!', 'success');
       } else {
-        await addClient(formData);
+        savedClient = await addClient(formData);
         addToast('Cliente adicionado com sucesso!', 'success');
       }
       handleCloseModal();
-      await fetchClients(); // Refetch clients after submission
+      await fetchClients();
+
+      // Sync com Asaas em background — não bloqueia o fluxo
+      addToast('Sincronizando com Asaas...', 'info');
+      syncClientWithAsaas(savedClient)
+        .then(asaasId => {
+          if (asaasId) {
+            addToast(`Cliente sincronizado no Asaas! ID: ${asaasId}`, 'success');
+          } else {
+            addToast('Asaas: cliente não sincronizado (verifique CNPJ ou API Key).', 'error');
+          }
+        })
+        .catch(() => {
+          addToast('Erro ao sincronizar com Asaas.', 'error');
+        });
+
     } catch (err: any) {
       console.error(err);
       addToast(err.message, 'error');

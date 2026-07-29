@@ -67,7 +67,8 @@ const FinancePage: React.FC = () => {
             })
             .filter(r => 
                 (r.contracts.contract_code.toLowerCase().includes(lowercasedSearch)) ||
-                (r.contracts.proposals?.empresas_unidades?.nome_fantasia?.toLowerCase().includes(lowercasedSearch))
+                (r.contracts.proposals?.empresas_unidades?.nome_fantasia?.toLowerCase().includes(lowercasedSearch)) ||
+                (r.contracts.proposals?.empresas_unidades?.razao_social?.toLowerCase().includes(lowercasedSearch))
             );
         setFilteredRecords(filtered);
     }, [records, statusFilter, showArchived, searchTerm]);
@@ -215,8 +216,15 @@ const FinancePage: React.FC = () => {
                     <tbody className="bg-gray-800 divide-y divide-gray-700">
                         {filteredRecords.length > 0 ? filteredRecords.map(record => (
                             <tr key={record.financial_record_id} className={`hover:bg-gray-700/50 transition-colors ${record.billing_status === 'Arquivado' ? 'opacity-60' : ''}`}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-white">{record.contracts.contract_code}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{record.contracts.proposals?.empresas_unidades?.nome_fantasia}</td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-white">
+                                    {record.contracts ? record.contracts.contract_code : 'AVULSA'}
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
+                                    {record.contracts
+                                        ? (record.contracts.proposals?.empresas_unidades?.nome_fantasia || record.contracts.proposals?.empresas_unidades?.razao_social)
+                                        : (record.empresas_unidades?.nome_fantasia || record.empresas_unidades?.razao_social)
+                                    }
+                                </td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-400">{formatCurrency(record.total_revenue)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm text-red-400">{formatCurrency(record.total_expenses)}</td>
                                 <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-400">{formatCurrency(record.net_profit)}</td>

@@ -65,11 +65,17 @@ const FinancePage: React.FC = () => {
                 if (statusFilter === 'Todos') return true;
                 return r.billing_status === statusFilter;
             })
-            .filter(r => 
-                (r.contracts.contract_code.toLowerCase().includes(lowercasedSearch)) ||
-                (r.contracts.proposals?.empresas_unidades?.nome_fantasia?.toLowerCase().includes(lowercasedSearch)) ||
-                (r.contracts.proposals?.empresas_unidades?.razao_social?.toLowerCase().includes(lowercasedSearch))
-            );
+            .filter(r => {
+                const contractCode = r.contracts?.contract_code?.toLowerCase() || 'avulsa';
+                const clientName = r.contracts
+                    ? (r.contracts.proposals?.empresas_unidades?.nome_fantasia || r.contracts.proposals?.empresas_unidades?.razao_social)
+                    : (r.empresas_unidades?.nome_fantasia || r.empresas_unidades?.razao_social);
+
+                return (
+                    contractCode.includes(lowercasedSearch) ||
+                    (clientName?.toLowerCase() || '').includes(lowercasedSearch)
+                );
+            });
         setFilteredRecords(filtered);
     }, [records, statusFilter, showArchived, searchTerm]);
     

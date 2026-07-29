@@ -27,15 +27,17 @@ const InvoiceShareModal: React.FC<InvoiceShareModalProps> = ({ isOpen, onClose, 
     };
 
     const handleShareEmail = () => {
-        const subject = `Fatura Ref. Contrato: ${record.contracts.contract_code} - Hyperview`;
-        const body = `Olá,\n\nSegue o link para acessar a fatura referente ao contrato ${record.contracts.contract_code}:\n\n${shareUrl}\n\nAtenciosamente,\nEquipe Hyperview`;
+        const docName = record.contracts ? `Contrato ${record.contracts.contract_code}` : 'Fatura Avulsa';
+        const subject = `Fatura Ref. ${docName} - Hyperview`;
+        const body = `Olá,\n\nSegue o link para acessar a fatura referente ao ${docName.toLowerCase()}:\n\n${shareUrl}\n\nAtenciosamente,\nEquipe Hyperview`;
         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     };
 
     const handleShareWhatsApp = () => {
-        const message = `Olá! Acesse a fatura referente ao contrato ${record.contracts.contract_code} da Hyperview através do link: ${shareUrl}`;
+        const docName = record.contracts ? `Contrato ${record.contracts.contract_code}` : 'Fatura Avulsa';
+        const message = `Olá! Acesse a fatura referente ao ${docName.toLowerCase()} da Hyperview através do link: ${shareUrl}`;
         const encodedMessage = encodeURIComponent(message);
-        let phoneNumber = record.contracts.proposals?.contact_whatsapp?.replace(/\D/g, '') || '';
+        let phoneNumber = record.contracts?.proposals?.contact_whatsapp?.replace(/\D/g, '') || '';
 
         if (phoneNumber) {
             if (phoneNumber.length === 10 || phoneNumber.length === 11) {
@@ -53,13 +55,15 @@ const InvoiceShareModal: React.FC<InvoiceShareModalProps> = ({ isOpen, onClose, 
         setTimeout(() => window.print(), 500);
     };
 
+    const client = record.contracts?.proposals?.empresas_unidades || record.empresas_unidades;
+
     return (
         <Modal isOpen={isOpen} onClose={onClose} title="Compartilhar Fatura">
             <div className="p-2">
                 <div className="mb-6">
-                    <p className="text-gray-400 text-sm">Fatura do Contrato</p>
-                    <p className="font-bold text-white text-lg">{record.contracts.contract_code}</p>
-                    <p className="text-gray-300">Cliente: {record.contracts.proposals?.empresas_unidades?.nome_fantasia || 'N/A'}</p>
+                    <p className="text-gray-400 text-sm">{record.contracts ? 'Fatura do Contrato' : 'Fatura Avulsa'}</p>
+                    <p className="font-bold text-white text-lg">{record.contracts?.contract_code || 'AVULSA'}</p>
+                    <p className="text-gray-300">Cliente: {client?.nome_fantasia || client?.razao_social || 'N/A'}</p>
                 </div>
                 
                 <div className="space-y-4">

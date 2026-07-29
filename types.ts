@@ -198,6 +198,7 @@ export interface FinancialRecord extends FinancialRecordFormData {
     created_at: string;
     payment_instructions: string | null;
     contracts: Contract | null;
+    empresas_unidades?: EmpresaUnidade | null;
     description?: string | null;
 }
 

@@ -272,7 +272,7 @@ const FinancePage: React.FC = () => {
                 onSuccess={handleCreationSuccess}
             />
             
-            <Modal isOpen={!!recordToEdit} onClose={() => setRecordToEdit(null)} title={`Detalhes Financeiros: ${recordToEdit?.contracts.contract_code}`}>
+            <Modal isOpen={!!recordToEdit} onClose={() => setRecordToEdit(null)} title={`Detalhes Financeiros: ${recordToEdit?.contracts?.contract_code || 'AVULSA'}`}>
                 {recordToEdit && (
                     <FinancialRecordForm 
                         record={recordToEdit}
@@ -283,13 +283,13 @@ const FinancePage: React.FC = () => {
             </Modal>
             
             <Modal isOpen={!!recordToUpdateStatus} onClose={() => setRecordToUpdateStatus(null)} title={recordToUpdateStatus?.billing_status !== 'Arquivado' ? 'Confirmar Arquivamento' : 'Confirmar Desarquivamento'} closeOnBackdrop>
-                <div>
-                    <p className="text-gray-300 mb-6">
-                        {recordToUpdateStatus?.billing_status !== 'Arquivado' ? 
-                            <>Você tem certeza que deseja arquivar o registro do contrato <strong className="font-semibold text-white">{recordToUpdateStatus?.contracts.contract_code}</strong>?</> :
-                            <>Você tem certeza que deseja desarquivar o registro do contrato <strong className="font-semibold text-white">{recordToUpdateStatus?.contracts.contract_code}</strong>?</>
-                        }
-                    </p>
+                            <div>
+                                <p className="text-gray-300 mb-6">
+                                    {recordToUpdateStatus?.billing_status !== 'Arquivado' ? 
+                                        <>Você tem certeza que deseja arquivar o registro do contrato <strong className="font-semibold text-white">{recordToUpdateStatus?.contracts?.contract_code || 'AVULSA'}</strong>?</> : 
+                                        <>Você tem certeza que deseja desarquivar o registro do contrato <strong className="font-semibold text-white">{recordToUpdateStatus?.contracts?.contract_code || 'AVULSA'}</strong>?</>
+                                    }
+                                </p>
                     <div className="flex justify-end gap-4">
                         <Button variant="secondary" onClick={() => setRecordToUpdateStatus(null)} disabled={isSubmitting}>
                             Cancelar

@@ -206,64 +206,120 @@ const FinancePage: React.FC = () => {
                 </div>
             )}
 
-            <div className="bg-gray-800 shadow-md rounded-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-700">
-                    <thead className="bg-gray-700/50">
-                        <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contrato</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cliente</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Receita Total</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Despesas</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Lucro Líquido</th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status Pag.</th>
-                            <th className="relative px-6 py-3"><span className="sr-only">Ações</span></th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-gray-800 divide-y divide-gray-700">
-                        {filteredRecords.length > 0 ? filteredRecords.map(record => (
-                            <tr key={record.financial_record_id} className={`hover:bg-gray-700/50 transition-colors ${record.billing_status === 'Arquivado' ? 'opacity-60' : ''}`}>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-mono text-white">
-                                    {record.contracts ? record.contracts.contract_code : 'AVULSA'}
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                    {record.contracts
-                                        ? (record.contracts.proposals?.empresas_unidades?.nome_fantasia || record.contracts.proposals?.empresas_unidades?.razao_social)
-                                        : (record.empresas_unidades?.nome_fantasia || record.empresas_unidades?.razao_social)
-                                    }
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-semibold text-green-400">{formatCurrency(record.total_revenue)}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm text-red-400">{formatCurrency(record.total_expenses)}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm font-bold text-blue-400">{formatCurrency(record.net_profit)}</td>
-                                <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                    <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyles(record.billing_status)}`}>
-                                        {record.billing_status}
-                                    </span>
-                                </td>
-                                <td className="px-6 py-4 whitespace-nowrap text-right text-sm">
-                                    <div className="flex justify-end items-center gap-4">
-                                        <button onClick={() => handleOpenShareModal(record)} className="text-green-400 hover:text-green-300 transition-colors" title="Compartilhar Fatura">
-                                            <FiShare2 size={18} />
-                                        </button>
-                                        <button onClick={() => setRecordToEdit(record)} className="text-blue-400 hover:text-blue-300" title="Editar / Detalhes">
-                                            <FiEdit size={18} />
-                                        </button>
-                                        <button onClick={() => setRecordToUpdateStatus(record)} className="text-yellow-400 hover:text-yellow-300" title={record.billing_status === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
-                                            {record.billing_status === 'Arquivado' ? <FiUnlock size={18} /> : <FiArchive size={18} />}
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        )) : (
+            <div className="bg-gray-800 shadow-md rounded-lg">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-hidden">
+                    <table className="w-full divide-y divide-gray-700">
+                        <thead className="bg-gray-700/50">
                             <tr>
-                                <td colSpan={7} className="text-center py-10 text-gray-400">
-                                    <FiDollarSign className="mx-auto h-12 w-12 text-gray-500 mb-4" />
-                                    <h3 className="text-lg font-semibold text-white">Nenhum registro financeiro encontrado</h3>
-                                    <p>Clique em "Criar Fatura" para começar.</p>
-                                </td>
+                                <th className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contrato</th>
+                                <th className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cliente</th>
+                                <th className="px-3 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Receita</th>
+                                <th className="px-3 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Despesas</th>
+                                <th className="px-3 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Lucro</th>
+                                <th className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                <th className="relative px-3 py-3"><span className="sr-only">Ações</span></th>
                             </tr>
-                        )}
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody className="bg-gray-800 divide-y divide-gray-700">
+                            {filteredRecords.length > 0 ? filteredRecords.map(record => (
+                                <tr key={record.financial_record_id} className={`hover:bg-gray-700/50 transition-colors ${record.billing_status === 'Arquivado' ? 'opacity-60' : ''}`}>
+                                    <td className="px-3 py-4 whitespace-nowrap text-xs font-mono text-white">
+                                        {record.contracts ? record.contracts.contract_code : 'AVULSA'}
+                                    </td>
+                                    <td className="px-3 py-4 text-xs text-gray-300 truncate max-w-xs">
+                                        {record.contracts
+                                            ? (record.contracts.proposals?.empresas_unidades?.nome_fantasia || record.contracts.proposals?.empresas_unidades?.razao_social)
+                                            : (record.empresas_unidades?.nome_fantasia || record.empresas_unidades?.razao_social)
+                                        }
+                                    </td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-xs font-semibold text-green-400 text-right">{formatCurrency(record.total_revenue)}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-xs text-red-400 text-right">{formatCurrency(record.total_expenses)}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-xs font-bold text-blue-400 text-right">{formatCurrency(record.net_profit)}</td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-xs">
+                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyles(record.billing_status)}`}>
+                                            {record.billing_status}
+                                        </span>
+                                    </td>
+                                    <td className="px-3 py-4 whitespace-nowrap text-right text-sm">
+                                        <div className="flex justify-end items-center gap-2">
+                                            <button onClick={() => handleOpenShareModal(record)} className="text-green-400 hover:text-green-300 transition-colors" title="Compartilhar Fatura">
+                                                <FiShare2 size={16} />
+                                            </button>
+                                            <button onClick={() => setRecordToEdit(record)} className="text-blue-400 hover:text-blue-300" title="Editar / Detalhes">
+                                                <FiEdit size={16} />
+                                            </button>
+                                            <button onClick={() => setRecordToUpdateStatus(record)} className="text-yellow-400 hover:text-yellow-300" title={record.billing_status === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
+                                                {record.billing_status === 'Arquivado' ? <FiUnlock size={16} /> : <FiArchive size={16} />}
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            )) : (
+                                <tr>
+                                    <td colSpan={7} className="text-center py-10 text-gray-400">
+                                        <FiDollarSign className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                                        <h3 className="text-lg font-semibold text-white">Nenhum registro financeiro encontrado</h3>
+                                        <p>Clique em "Criar Fatura" para começar.</p>
+                                    </td>
+                                </tr>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden divide-y divide-gray-700">
+                    {filteredRecords.length > 0 ? filteredRecords.map(record => (
+                        <div key={record.financial_record_id} className={`p-4 space-y-2 ${record.billing_status === 'Arquivado' ? 'opacity-60' : ''}`}>
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="text-xs font-mono text-white font-bold">{record.contracts ? record.contracts.contract_code : 'AVULSA'}</p>
+                                    <p className="text-xs text-gray-400 truncate">
+                                        {record.contracts
+                                            ? (record.contracts.proposals?.empresas_unidades?.nome_fantasia || record.contracts.proposals?.empresas_unidades?.razao_social)
+                                            : (record.empresas_unidades?.nome_fantasia || record.empresas_unidades?.razao_social)
+                                        }
+                                    </p>
+                                </div>
+                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${getStatusStyles(record.billing_status)}`}>
+                                    {record.billing_status}
+                                </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-2 text-xs">
+                                <div>
+                                    <p className="text-gray-400">Receita</p>
+                                    <p className="font-semibold text-green-400">{formatCurrency(record.total_revenue)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-400">Despesas</p>
+                                    <p className="font-semibold text-red-400">{formatCurrency(record.total_expenses)}</p>
+                                </div>
+                                <div>
+                                    <p className="text-gray-400">Lucro</p>
+                                    <p className="font-semibold text-blue-400">{formatCurrency(record.net_profit)}</p>
+                                </div>
+                            </div>
+                            <div className="flex justify-end gap-3 pt-2">
+                                <button onClick={() => handleOpenShareModal(record)} className="text-green-400 hover:text-green-300 transition-colors" title="Compartilhar">
+                                    <FiShare2 size={18} />
+                                </button>
+                                <button onClick={() => setRecordToEdit(record)} className="text-blue-400 hover:text-blue-300" title="Editar">
+                                    <FiEdit size={18} />
+                                </button>
+                                <button onClick={() => setRecordToUpdateStatus(record)} className="text-yellow-400 hover:text-yellow-300" title={record.billing_status === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
+                                    {record.billing_status === 'Arquivado' ? <FiUnlock size={18} /> : <FiArchive size={18} />}
+                                </button>
+                            </div>
+                        </div>
+                    )) : (
+                        <div className="text-center py-10 text-gray-400">
+                            <FiDollarSign className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                            <h3 className="text-lg font-semibold text-white">Nenhum registro</h3>
+                            <p className="text-sm">Clique em "Criar Fatura"</p>
+                        </div>
+                    )}
+                </div>
             </div>
             
             <CreateInvoiceModal 

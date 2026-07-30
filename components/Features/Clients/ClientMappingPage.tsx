@@ -122,57 +122,99 @@ const ClientMappingPage: React.FC = () => {
                 </div>
             </div>
 
-            <div className="bg-gray-800 shadow-md rounded-lg overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-700">
-                    <thead className="bg-gray-700/50">
-                        <tr>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Empresa / Nome Fantasia</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">CNPJ</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Asaas ID</th>
-                            <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
-                            <th scope="col" className="relative px-6 py-3"><span className="sr-only">Ações</span></th>
-                        </tr>
-                    </thead>
-                    <tbody className="bg-gray-800 divide-y divide-gray-700">
-                        {filteredClients.length > 0 ? (
-                            filteredClients.map((client) => (
-                                <tr key={client.client_id} className="hover:bg-gray-700/50 transition-all duration-200">
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">
-                                        {client.nome_fantasia || client.razao_social || client.contact_name || '-'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                        {client.cnpj_unidade || '-'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                                        {client.asaas_customer_id || '-'}
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(client)}`}>
-                                            {getStatusIcon(client)}
-                                            <span className="ml-1">{getStatusText(client)}</span>
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                        <button
-                                            onClick={() => handleSyncSingle(client)}
-                                            disabled={syncStatus[client.client_id] === 'syncing'}
-                                            className="text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
-                                            title="Sincronizar com Asaas"
-                                        >
-                                            <FiRefreshCw size={18} />
-                                        </button>
+            <div className="bg-gray-800 shadow-md rounded-lg">
+                {/* Desktop Table */}
+                <div className="hidden md:block overflow-hidden">
+                    <table className="w-full divide-y divide-gray-700">
+                        <thead className="bg-gray-700/50">
+                            <tr>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Empresa</th>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">CNPJ</th>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Asaas ID</th>
+                                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                                <th scope="col" className="relative px-3 py-3"><span className="sr-only">Ações</span></th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-gray-800 divide-y divide-gray-700">
+                            {filteredClients.length > 0 ? (
+                                filteredClients.map((client) => (
+                                    <tr key={client.client_id} className="hover:bg-gray-700/50 transition-all duration-200">
+                                        <td className="px-3 py-4 whitespace-nowrap text-xs font-medium text-white truncate">
+                                            {client.nome_fantasia || client.razao_social || client.contact_name || '-'}
+                                        </td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-xs text-gray-300">
+                                            {client.cnpj_unidade || '-'}
+                                        </td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-xs text-gray-300 font-mono">
+                                            {client.asaas_customer_id || '-'}
+                                        </td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-xs">
+                                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(client)}`}>
+                                                {getStatusIcon(client)}
+                                                <span className="ml-1">{getStatusText(client)}</span>
+                                            </span>
+                                        </td>
+                                        <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
+                                            <button
+                                                onClick={() => handleSyncSingle(client)}
+                                                disabled={syncStatus[client.client_id] === 'syncing'}
+                                                className="text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
+                                                title="Sincronizar com Asaas"
+                                            >
+                                                <FiRefreshCw size={16} className={syncStatus[client.client_id] === 'syncing' ? 'animate-spin' : ''} />
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))
+                            ) : (
+                                <tr>
+                                    <td colSpan={5} className="text-center py-10 text-gray-400">
+                                        Nenhum cliente encontrado.
                                     </td>
                                 </tr>
-                            ))
-                        ) : (
-                            <tr>
-                                <td colSpan={5} className="text-center py-10 text-gray-400">
-                                    Nenhum cliente encontrado.
-                                </td>
-                            </tr>
-                        )}
-                    </tbody>
-                </table>
+                            )}
+                        </tbody>
+                    </table>
+                </div>
+
+                {/* Mobile Cards */}
+                <div className="md:hidden divide-y divide-gray-700">
+                    {filteredClients.length > 0 ? (
+                        filteredClients.map((client) => (
+                            <div key={client.client_id} className="p-4 space-y-2">
+                                <div className="flex justify-between items-start">
+                                    <div className="flex-1 min-w-0">
+                                        <p className="text-xs font-bold text-white truncate">
+                                            {client.nome_fantasia || client.razao_social || client.contact_name || '-'}
+                                        </p>
+                                        <p className="text-xs text-gray-400">CNPJ: {client.cnpj_unidade || '-'}</p>
+                                    </div>
+                                    <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${getStatusColor(client)}`}>
+                                        {getStatusIcon(client)}
+                                        <span className="ml-1">{getStatusText(client)}</span>
+                                    </span>
+                                </div>
+                                <div className="text-xs text-gray-400">
+                                    <p>Asaas ID: <span className="text-gray-300 font-mono">{client.asaas_customer_id || '-'}</span></p>
+                                </div>
+                                <div className="flex justify-end pt-2">
+                                    <button
+                                        onClick={() => handleSyncSingle(client)}
+                                        disabled={syncStatus[client.client_id] === 'syncing'}
+                                        className="text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
+                                        title="Sincronizar com Asaas"
+                                    >
+                                        <FiRefreshCw size={18} className={syncStatus[client.client_id] === 'syncing' ? 'animate-spin' : ''} />
+                                    </button>
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center py-10 text-gray-400">
+                            Nenhum cliente encontrado.
+                        </div>
+                    )}
+                </div>
             </div>
 
             <div className="mt-6 p-4 bg-gray-800 rounded-lg border border-gray-700">

@@ -222,53 +222,92 @@ const ContractsPage: React.FC<ContractsPageProps> = ({ proposalForContract, onCo
         </div>
 
 
-        <div className="bg-gray-800 shadow-md rounded-lg overflow-x-auto">
-          <table className="min-w-full divide-y divide-gray-700">
-            <thead className="bg-gray-700/50">
-              <tr>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contrato</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Proposta Origem</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cliente</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Valor</th>
-                <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
-                <th scope="col" className="relative px-6 py-3"><span className="sr-only">Ações</span></th>
-              </tr>
-            </thead>
-            <tbody className="bg-gray-800 divide-y divide-gray-700">
-              {filteredContracts.length > 0 ? (
-                  filteredContracts.map((contract) => (
-                      <tr key={contract.contract_id} className={`hover:bg-gray-700/50 transition-all duration-200 ${contract.status === 'Arquivado' ? 'opacity-60' : ''}`}>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white font-mono">{contract.contract_code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-400 font-mono">{contract.proposals?.proposal_code}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{contract.proposals?.empresas_unidades?.nome_fantasia || contract.proposals?.empresas_unidades?.razao_social || '-'}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300 font-semibold">{formatCurrency(contract.contract_value)}</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm">
-                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyles(contract.status)}`}>
-                          {contract.status}
-                          </span>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                          <div className="flex justify-end items-center gap-4">
-                            <button onClick={() => handleOpenShareModal(contract)} className="text-green-400 hover:text-green-300 transition-colors" title="Compartilhar/Ver PDF"> <FiShare2 size={18} /> </button>
-                            <button onClick={() => handleOpenModalForEdit(contract)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar"> <FiEdit size={18} /> </button>
-                            <button onClick={() => setContractToUpdateStatus(contract)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title={contract.status === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
-                                {contract.status === 'Arquivado' ? <FiUnlock size={18} /> : <FiArchive size={18} />}
-                            </button>
-                          </div>
-                      </td>
-                      </tr>
-                  ))
-              ) : (
-                  <tr>
-                      <td colSpan={6} className="text-center py-10 text-gray-400">
-                          <FiFileText className="mx-auto h-12 w-12 text-gray-500 mb-4" />
-                          <h3 className="text-lg font-semibold text-white">Nenhum contrato encontrado</h3>
-                          <p>Contratos são gerados a partir de propostas aprovadas.</p>
-                      </td>
-                  </tr>
-              )}
-            </tbody>
-          </table>
+        <div className="bg-gray-800 shadow-md rounded-lg">
+          {/* Desktop Table */}
+          <div className="hidden md:block overflow-hidden">
+            <table className="w-full divide-y divide-gray-700">
+              <thead className="bg-gray-700/50">
+                <tr>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contrato</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Proposta</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Cliente</th>
+                  <th scope="col" className="px-3 py-3 text-right text-xs font-medium text-gray-300 uppercase tracking-wider">Valor</th>
+                  <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                  <th scope="col" className="relative px-3 py-3"><span className="sr-only">Ações</span></th>
+                </tr>
+              </thead>
+              <tbody className="bg-gray-800 divide-y divide-gray-700">
+                {filteredContracts.length > 0 ? (
+                    filteredContracts.map((contract) => (
+                        <tr key={contract.contract_id} className={`hover:bg-gray-700/50 transition-all duration-200 ${contract.status === 'Arquivado' ? 'opacity-60' : ''}`}>
+                        <td className="px-3 py-4 whitespace-nowrap text-xs font-medium text-white font-mono">{contract.contract_code}</td>
+                        <td className="px-3 py-4 whitespace-nowrap text-xs text-gray-400 font-mono">{contract.proposals?.proposal_code}</td>
+                        <td className="px-3 py-4 text-xs text-gray-300 truncate">{contract.proposals?.empresas_unidades?.nome_fantasia || contract.proposals?.empresas_unidades?.razao_social || '-'}</td>
+                        <td className="px-3 py-4 whitespace-nowrap text-xs text-gray-300 font-semibold text-right">{formatCurrency(contract.contract_value)}</td>
+                        <td className="px-3 py-4 whitespace-nowrap text-xs">
+                            <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusStyles(contract.status)}`}>
+                            {contract.status}
+                            </span>
+                        </td>
+                        <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
+                            <div className="flex justify-end items-center gap-2">
+                              <button onClick={() => handleOpenShareModal(contract)} className="text-green-400 hover:text-green-300 transition-colors" title="Compartilhar/Ver PDF"> <FiShare2 size={16} /> </button>
+                              <button onClick={() => handleOpenModalForEdit(contract)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar"> <FiEdit size={16} /> </button>
+                              <button onClick={() => setContractToUpdateStatus(contract)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title={contract.status === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
+                                  {contract.status === 'Arquivado' ? <FiUnlock size={16} /> : <FiArchive size={16} />}
+                              </button>
+                            </div>
+                        </td>
+                        </tr>
+                    ))
+                ) : (
+                    <tr>
+                        <td colSpan={6} className="text-center py-10 text-gray-400">
+                            <FiFileText className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                            <h3 className="text-lg font-semibold text-white">Nenhum contrato encontrado</h3>
+                            <p>Contratos são gerados a partir de propostas aprovadas.</p>
+                        </td>
+                    </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Mobile Cards */}
+          <div className="md:hidden divide-y divide-gray-700">
+            {filteredContracts.length > 0 ? (
+                filteredContracts.map((contract) => (
+                    <div key={contract.contract_id} className={`p-4 space-y-2 ${contract.status === 'Arquivado' ? 'opacity-60' : ''}`}>
+                        <div className="flex justify-between items-start">
+                            <div className="flex-1 min-w-0">
+                                <p className="text-xs font-mono font-bold text-white">{contract.contract_code}</p>
+                                <p className="text-xs text-gray-400 truncate">{contract.proposals?.empresas_unidades?.nome_fantasia || contract.proposals?.empresas_unidades?.razao_social || '-'}</p>
+                            </div>
+                            <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${getStatusStyles(contract.status)}`}>
+                                {contract.status}
+                            </span>
+                        </div>
+                        <div className="text-xs text-gray-400 space-y-1">
+                            <p>Proposta: <span className="text-gray-300 font-mono">{contract.proposals?.proposal_code}</span></p>
+                            <p>Valor: <span className="text-gray-300 font-semibold">{formatCurrency(contract.contract_value)}</span></p>
+                        </div>
+                        <div className="flex justify-end gap-3 pt-2">
+                          <button onClick={() => handleOpenShareModal(contract)} className="text-green-400 hover:text-green-300 transition-colors" title="Compartilhar"> <FiShare2 size={18} /> </button>
+                          <button onClick={() => handleOpenModalForEdit(contract)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar"> <FiEdit size={18} /> </button>
+                          <button onClick={() => setContractToUpdateStatus(contract)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title={contract.status === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
+                              {contract.status === 'Arquivado' ? <FiUnlock size={18} /> : <FiArchive size={18} />}
+                          </button>
+                        </div>
+                    </div>
+                ))
+            ) : (
+                <div className="text-center py-10 text-gray-400">
+                    <FiFileText className="mx-auto h-12 w-12 text-gray-500 mb-4" />
+                    <h3 className="text-lg font-semibold text-white">Nenhum contrato</h3>
+                    <p className="text-sm">Gerados a partir de propostas aprovadas.</p>
+                </div>
+            )}
+          </div>
         </div>
 
         <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={contractToEdit ? 'Editar Contrato' : 'Gerar Novo Contrato'}>

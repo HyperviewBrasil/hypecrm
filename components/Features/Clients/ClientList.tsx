@@ -203,53 +203,91 @@ const ClientList: React.FC<{
           </label>
       </div>
 
-      <div className="bg-gray-800 shadow-md rounded-lg overflow-x-auto">
-        <table className="min-w-full divide-y divide-gray-700">
-          <thead className="bg-gray-700/50">
-            <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Empresa / Nome Fantasia</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contato Principal</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">CNPJ</th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
-              <th scope="col" className="relative px-6 py-3"><span className="sr-only">Ações</span></th>
-            </tr>
-          </thead>
-          <tbody className="bg-gray-800 divide-y divide-gray-700">
-            {filteredClients.length > 0 ? (
-                filteredClients.map((client) => (
-                    <tr key={client.client_id} className={`hover:bg-gray-700/50 transition-all duration-200 ${client.status_texto === 'Arquivado' ? 'opacity-60' : ''}`}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-white">{client.nome_fantasia || client.razao_social || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">
-                        <p>{client.contact_name}</p>
-                        <p className="text-xs text-gray-400">{client.contact_whatsapp}</p>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-300">{client.cnpj_unidade || '-'}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm">
-                        <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClasses(client.status_texto)}`}>
-                        {client.status_texto}
-                        </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                        <div className="flex justify-end items-center gap-4">
-                        <button onClick={() => handleOpenModalForEdit(client)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar">
-                            <FiEdit size={18} />
-                        </button>
-                        <button onClick={() => setClientToUpdateStatus(client)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title={client.status_texto === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
-                             {client.status_texto === 'Arquivado' ? <FiUnlock size={18} /> : <FiArchive size={18} />}
-                        </button>
-                        </div>
-                    </td>
-                    </tr>
-                ))
-            ) : (
-                <tr>
-                    <td colSpan={5} className="text-center py-10 text-gray-400">
-                        Nenhum cliente encontrado.
-                    </td>
-                </tr>
-            )}
-          </tbody>
-        </table>
+      <div className="bg-gray-800 shadow-md rounded-lg">
+        {/* Desktop Table */}
+        <div className="hidden md:block overflow-hidden">
+          <table className="w-full divide-y divide-gray-700">
+            <thead className="bg-gray-700/50">
+              <tr>
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Empresa</th>
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Contato</th>
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">CNPJ</th>
+                <th scope="col" className="px-3 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">Status</th>
+                <th scope="col" className="relative px-3 py-3"><span className="sr-only">Ações</span></th>
+              </tr>
+            </thead>
+            <tbody className="bg-gray-800 divide-y divide-gray-700">
+              {filteredClients.length > 0 ? (
+                  filteredClients.map((client) => (
+                      <tr key={client.client_id} className={`hover:bg-gray-700/50 transition-all duration-200 ${client.status_texto === 'Arquivado' ? 'opacity-60' : ''}`}>
+                      <td className="px-3 py-4 whitespace-nowrap text-xs font-medium text-white truncate">{client.nome_fantasia || client.razao_social || '-'}</td>
+                      <td className="px-3 py-4 text-xs text-gray-300">
+                          <p className="truncate">{client.contact_name}</p>
+                          <p className="text-xs text-gray-400 truncate">{client.contact_whatsapp}</p>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-xs text-gray-300">{client.cnpj_unidade || '-'}</td>
+                      <td className="px-3 py-4 whitespace-nowrap text-xs">
+                          <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusClasses(client.status_texto)}`}>
+                          {client.status_texto}
+                          </span>
+                      </td>
+                      <td className="px-3 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex justify-end items-center gap-2">
+                          <button onClick={() => handleOpenModalForEdit(client)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar">
+                              <FiEdit size={16} />
+                          </button>
+                          <button onClick={() => setClientToUpdateStatus(client)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title={client.status_texto === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
+                               {client.status_texto === 'Arquivado' ? <FiUnlock size={16} /> : <FiArchive size={16} />}
+                          </button>
+                          </div>
+                      </td>
+                      </tr>
+                  ))
+              ) : (
+                  <tr>
+                      <td colSpan={5} className="text-center py-10 text-gray-400">
+                          Nenhum cliente encontrado.
+                      </td>
+                  </tr>
+              )}
+            </tbody>
+          </table>
+        </div>
+
+        {/* Mobile Cards */}
+        <div className="md:hidden divide-y divide-gray-700">
+          {filteredClients.length > 0 ? (
+              filteredClients.map((client) => (
+                  <div key={client.client_id} className={`p-4 space-y-2 ${client.status_texto === 'Arquivado' ? 'opacity-60' : ''}`}>
+                      <div className="flex justify-between items-start">
+                          <div className="flex-1 min-w-0">
+                              <p className="text-xs font-bold text-white truncate">{client.nome_fantasia || client.razao_social || '-'}</p>
+                              <p className="text-xs text-gray-400 truncate">{client.contact_name}</p>
+                              <p className="text-xs text-gray-500 truncate">{client.contact_whatsapp}</p>
+                          </div>
+                          <span className={`ml-2 px-2 py-1 text-xs font-semibold rounded-full whitespace-nowrap ${getStatusClasses(client.status_texto)}`}>
+                              {client.status_texto}
+                          </span>
+                      </div>
+                      <div className="text-xs text-gray-400">
+                          CNPJ: {client.cnpj_unidade || '-'}
+                      </div>
+                      <div className="flex justify-end gap-3 pt-2">
+                          <button onClick={() => handleOpenModalForEdit(client)} className="text-blue-400 hover:text-blue-300 transition-colors" title="Editar">
+                              <FiEdit size={18} />
+                          </button>
+                          <button onClick={() => setClientToUpdateStatus(client)} className="text-yellow-400 hover:text-yellow-300 transition-colors" title={client.status_texto === 'Arquivado' ? 'Desarquivar' : 'Arquivar'}>
+                               {client.status_texto === 'Arquivado' ? <FiUnlock size={18} /> : <FiArchive size={18} />}
+                          </button>
+                      </div>
+                  </div>
+              ))
+          ) : (
+              <div className="text-center py-10 text-gray-400">
+                  Nenhum cliente encontrado.
+              </div>
+          )}
+        </div>
       </div>
 
       <Modal isOpen={isModalOpen} onClose={handleCloseModal} title={clientToEdit && 'client_id' in clientToEdit ? 'Editar Cliente' : 'Adicionar Novo Cliente'}>
